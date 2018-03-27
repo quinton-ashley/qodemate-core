@@ -14,11 +14,11 @@
 	],
 	"dependencies": {
 		"await-spawn": "^2.0.0",
+		"bluebird": "^3.5.1",
 		"bootstrap": "^4.0.0",
-		"chalk": "^2.3.2",
 		"copy-paste": "^1.3.0",
 		"csv-string": "^2.3.3",
-		"express": "^4.16.3",
+		"electron-pug": "^1.5.1",
 		"fs-extra": "^4.0.3",
 		"jquery": "^3.3.1",
 		"markdown-it": "^8.4.1",
@@ -30,7 +30,6 @@
 		"popper.js": "^1.14.1",
 		"pug": "^2.0.3",
 		"robotjs": "^0.4.7",
-		"server-destroy": "^1.0.1",
 		"tether": "^1.4.3"
 	},
 	"description": "Presents code dynamically.",
@@ -58,5 +57,5 @@
 		"version": "git add -A",
 		"postversion": "git push && git push --tags"
 	},
-	"version": "0.0.1"
+	"version": "0.0.2"
 }

@@ -1,9 +1,17 @@
 module.exports = function (args, opt) {
+	const {
+		app
+	} = require('electron').remote;
 	const bot = require('./bot.js');
 	const fs = require('fs');
 	const ncp = require('copy-paste');
 	const open = require('opn');
 	const path = require('path');
+	const {
+		promisify
+	} = require('util');
+	const delay = promisify(setTimeout);
+	const copy = promisify(ncp.copy);
 
 	const log = console.log;
 
@@ -132,7 +140,7 @@ module.exports = function (args, opt) {
 		return result;
 	}
 
-	function moveToDest(past, cur) {
+	async function moveToDest(past, cur) {
 		// finds the shortest distance in lines that bot needs to
 		// traverse to reach the destination
 		let from = {
@@ -164,18 +172,18 @@ module.exports = function (args, opt) {
 		bot.moveToEOL();
 	}
 
-	function performPart() {
+	async function performPart() {
 		let cur, past;
 		if (setIdx >= 0) {
 			past = set[setIdx];
 		} else {
 			past = set[setIdx + 1];
+			bot.clear();
 		}
 		cur = set[setIdx + 1];
 
 		if (check && (cur.num != past.num)) {
 			check = false;
-			bot.focusOnApp();
 			return false;
 		}
 		check = true;
@@ -188,7 +196,7 @@ module.exports = function (args, opt) {
 		if (cur.lines >= 0) {
 			let textToPaste;
 			if (cur.lines == 0) {
-				bot.delete(seq[cur.opt.d].lines);
+				bot.deleteLines(seq[cur.opt.d].lines);
 				let firstChar = cur.text[0];
 				let lastChar = cur.text[cur.text.length - 1];
 				let regexReplace = `${firstChar}[^${lastChar}]*${lastChar}`;
@@ -198,29 +206,28 @@ module.exports = function (args, opt) {
 			} else {
 				textToPaste = cur.text;
 			}
-			var paste = () => {
-				bot.paste();
-				performStep().next();
-			};
-			ncp.copy(textToPaste, paste);
+			await copy(textToPaste);
+			bot.paste();
+			return true;
 		} else {
-			bot.delete(-cur.lines);
-			performStep().next();
+			bot.deleteLines(-cur.lines);
+			return true;
 		}
 	}
 
-	function* performStep() {
-		yield setTimeout(performPart, 100);
-	}
-
-	function perform() {
+	async function perform() {
 		bot.focusOnFile(0);
-		performStep().next();
+		//		await delay(1000);
+		while (await performPart()) {
+			//			await delay(1000);
+		}
+		bot.focusOnApp();
+		//		await delay(1000);
 	}
 
 	this.next = () => {
 		log('next');
-		bot.ensureKeysNotPressed(perform);
+		perform();
 	}
 
 	this.prev = () => {
@@ -228,7 +235,13 @@ module.exports = function (args, opt) {
 	}
 
 	this.reset = () => {
+		log('reset');
 		setIdx = -1;
 		return 0;
 	}
+
+	this.close = () => {
+		app.quit();
+	}
+
 }
