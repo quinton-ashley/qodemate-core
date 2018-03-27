@@ -3,6 +3,7 @@ module.exports = function (args, opt) {
 		app
 	} = require('electron').remote;
 	const bot = require('./bot.js');
+	const delay = require('await-delay');
 	const fs = require('fs');
 	const ncp = require('copy-paste');
 	const open = require('opn');
@@ -10,7 +11,6 @@ module.exports = function (args, opt) {
 	const {
 		promisify
 	} = require('util');
-	const delay = promisify(setTimeout);
 	const copy = promisify(ncp.copy);
 
 	const log = console.log;
@@ -217,12 +217,12 @@ module.exports = function (args, opt) {
 
 	async function perform() {
 		bot.focusOnFile(0);
-		//		await delay(1000);
+		await delay(10);
 		while (await performPart()) {
-			//			await delay(1000);
+			await delay(100);
 		}
+		await delay(10);
 		bot.focusOnApp();
-		//		await delay(1000);
 	}
 
 	this.next = () => {

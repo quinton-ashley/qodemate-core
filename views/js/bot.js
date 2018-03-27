@@ -88,7 +88,7 @@ const Bot = function () {
 		this.moveToBOL();
 		this.move(lines, 'up', 'shift');
 		robot.keyTap('backspace');
-		robot.keyTap('left');
+		robot.keyTap('up');
 		log('deleted');
 	}
 
