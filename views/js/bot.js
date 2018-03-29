@@ -1,4 +1,5 @@
 const Bot = function () {
+	const open = require('opn');
 	const os = require('os');
 	const osType = os.type();
 	const linux = (osType == 'Linux');
@@ -20,11 +21,6 @@ const Bot = function () {
 			}]
 	};
 
-	this.ensureKeysNotPressed = (cb) => {
-		//		while (robot.Keyboard.getState(robot.KeySpace)) {}
-		cb();
-	}
-
 	this.focusOnApp = function () {
 		if (mac) {
 			robot.keyTap('tab', 'command');
@@ -36,14 +32,19 @@ const Bot = function () {
 		}
 	}
 
-	this.focusOnFile = function (fidx) {
-		if (mac) {
-			robot.keyTap('tab', 'command');
-			robot.keyToggle('command', 'up');
-		} else {
-			robot.moveMouse(loc.file[fidx].x, loc.file[fidx].y);
-			robot.mouseClick();
-		}
+	this.focusOnFile = function (file) {
+		//		if (mac) {
+		//			robot.keyTap('tab', 'command');
+		//			robot.keyToggle('command', 'up');
+		//			fidx++;
+		//			while (fidx--) {
+		//				robot.keyTap('tab', 'control');
+		//			}
+		//		} else {
+		//			robot.moveMouse(loc.file[fidx].x, loc.file[fidx].y);
+		//			robot.mouseClick();
+		//		}
+		open(file);
 	}
 
 	this.clear = function () {
@@ -89,6 +90,7 @@ const Bot = function () {
 		this.move(lines, 'up', 'shift');
 		robot.keyTap('backspace');
 		robot.keyTap('up');
+		this.moveToEOL();
 		log('deleted');
 	}
 

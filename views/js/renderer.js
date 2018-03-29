@@ -13,7 +13,7 @@ module.exports = function () {
 	//	const __parentDir = path.dirname(process.mainModule.filename);
 
 	let Presenter = require('./presenter.js');
-	let ent = new Presenter([path.join(__parentDir + '/../usr/test1.js')]);
+	let ent = new Presenter([path.join(__dirname + '/../../dev/jsTestFolder')]);
 
 	//		let mark = __parentDir + '/../usr/test0.md';
 	//		let file = fs.readFile(mark, 'utf8', (err, data) => {
@@ -31,7 +31,6 @@ module.exports = function () {
 	$('#close').click(ent.close);
 	$('#next').click(ent.next);
 	$('#play').click(ent.play);
-	$('#prev').click(ent.prev);
 	$('#reset').click(ent.reset);
 
 };
