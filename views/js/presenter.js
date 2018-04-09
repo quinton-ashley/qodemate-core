@@ -227,6 +227,8 @@ module.exports = function (args, opt) {
 	async function performPart() {
 		if (setIdx + 1 >= set.length) {
 			log('ERROR: ' + (setIdx + 1) + ' is outside the bounds of set ' + set.length);
+			log(set);
+			check = false;
 			return false;
 		}
 		let cur, past;
@@ -275,7 +277,7 @@ module.exports = function (args, opt) {
 		seq = qode[fIdx].seq;
 		set = qode[fIdx].set;
 		setIdx = setIdxs[fIdx];
-		await delay(1000);
+		await delay(500);
 		while (await performPart()) {
 			await delay(100);
 		}
@@ -299,6 +301,4 @@ module.exports = function (args, opt) {
 	this.close = () => {
 		app.quit();
 	}
-
-	this.open(args[0]);
 }
