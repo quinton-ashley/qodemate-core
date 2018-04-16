@@ -40,9 +40,11 @@ module.exports = function () {
 				label: 'Open',
 				click() {
 					//					ent.open([path.join(__dirname + '/../../dev/jsTestFolder')]);
-					ent.open(dialog.showOpenDialog({
+					let proj = dialog.showOpenDialog({
 						properties: ['openFile', 'openDirectory']
-					}));
+					});
+					log(proj);
+					ent.open(proj);
 				}
 			}]
 		},

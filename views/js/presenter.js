@@ -35,6 +35,7 @@ module.exports = function (args, opt) {
 	let files, usrDir, usrFiles;
 
 	this.open = (project) => {
+		log(project);
 		files = [];
 		usrFiles = [];
 		if (fs.lstatSync(project).isDirectory()) {
