@@ -21,25 +21,12 @@ module.exports = function () {
 	const Presenter = require('./presenter.js');
 	let ent = new Presenter();
 
-	//		const template = [{
-	//			label: 'File',
-	//			submenu: [{
-	//				label: 'Open',
-	//				click() {
-	//					dialog.showOpenDialog({
-	//						properties: ['openFile', 'openDirectory', 'multiSelections']
-	//					});
-	//				}
-	//			}]
-	//		}];
-
 	const template = [
 		{
 			label: 'File',
 			submenu: [{
 				label: 'Open',
 				click() {
-					//					ent.open([path.join(__dirname + '/../../dev/jsTestFolder')]);
 					let proj = dialog.showOpenDialog({
 						properties: ['openFile', 'openDirectory']
 					});
@@ -47,8 +34,7 @@ module.exports = function () {
 					ent.open(proj);
 				}
 			}]
-		},
-		{
+		}, {
 			label: 'Edit',
 			submenu: [
 				{
@@ -78,8 +64,8 @@ module.exports = function () {
 				{
 					role: 'selectall'
 				}
-    ]
-  },
+      ]
+    },
 		{
 			label: 'View',
 			submenu: [
@@ -110,8 +96,8 @@ module.exports = function () {
 				{
 					role: 'togglefullscreen'
 				}
-    ]
-  },
+      ]
+    },
 		{
 			role: 'window',
 			submenu: [
@@ -121,8 +107,8 @@ module.exports = function () {
 				{
 					role: 'close'
 				}
-    ]
-  },
+      ]
+    },
 		{
 			role: 'help',
 			submenu: [
@@ -131,14 +117,14 @@ module.exports = function () {
 					click() {
 						require('electron').shell.openExternal('https://electronjs.org')
 					}
-      }
-    ]
-  }
-]
+        }
+      ]
+    }
+  ]
 
 	if (process.platform === 'darwin') {
 		template.unshift({
-			label: app.getName(),
+			label: 'Qodemate',
 			submenu: [
 				{
 					role: 'about'
@@ -168,11 +154,11 @@ module.exports = function () {
 				{
 					role: 'quit'
 				}
-    ]
+      ]
 		})
 
 		// Edit menu
-		template[1].submenu.push({
+		template[2].submenu.push({
 			type: 'separator'
 		}, {
 			label: 'Speech',
@@ -183,11 +169,11 @@ module.exports = function () {
 				{
 					role: 'stopspeaking'
 				}
-      ]
+        ]
 		})
 
 		// Window menu
-		template[3].submenu = [
+		template[4].submenu = [
 			{
 				role: 'close'
 			},
@@ -203,7 +189,7 @@ module.exports = function () {
 			{
 				role: 'front'
 			}
-  ]
+    ]
 	}
 
 	const menu = Menu.buildFromTemplate(template);

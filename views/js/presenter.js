@@ -29,6 +29,7 @@ module.exports = function (args, opt) {
 	let set = []; // the set array stores step parts in sorted order, maintaing sequence order of step parts of the same number
 	let slides = []; // the slides array stores the markdown text associated with each step to be displayed as a slide if the user includes a slides.md file
 	let qode = [];
+	let lesson = [];
 	let steps = [];
 	let setIdxs = [];
 	let stepItr = 0;
@@ -38,20 +39,20 @@ module.exports = function (args, opt) {
 		log(project);
 		files = [];
 		usrFiles = [];
-		if (fs.lstatSync(project).isDirectory()) {
+		if (project.length == 1 && fs.lstatSync(project[0]).isDirectory()) {
 			// implement custom file search from .qode project file
-			files = search(/.*/gmi, project);
-			usrDir = __usrDir + '/' + path.relative(path.dirname(project), project);
-			fs.copySync(project, usrDir);
+			files = search(/.*/gmi, project[0]);
+			usrDir = __usrDir + '/' + path.relative(path.dirname(project[0]), project[0]);
+			fs.copySync(project[0], usrDir);
 			open(usrDir, {
 				app: 'brackets'
 			});
 			for (let i = 0; i < files.length; i++) {
-				usrFiles.push(usrDir + '/' + path.relative(project, files[i]));
+				usrFiles.push(usrDir + '/' + path.relative(project[0], files[i]));
 				fs.outputFile(usrFiles[i], '');
 			}
 		} else {
-			files = [project];
+			files = project;
 		}
 
 		for (let i = 0; i < files.length; i++) {
@@ -67,8 +68,7 @@ module.exports = function (args, opt) {
 					splitStr = '/*';
 					regex = /\n^.*\/\*\d[^\n]*/gm;
 				case '.md':
-					splitStr = '#';
-					regex = /\n^.*\# \d[^\n]*/gm;
+				case '.markdown':
 				case '.c':
 				case '.js':
 				case '.java':
@@ -117,7 +117,7 @@ module.exports = function (args, opt) {
 							// the seqIdx, j, is increased and the old cur is replaced by the
 							// object created after the if statement
 							if (k > 0) {
-								cur.seqIdx = j++; // WRONG? should be just j++; ?
+								cur.seqIdx = j++;
 								seq.push(cur);
 								set.push(cur);
 							}
@@ -166,10 +166,14 @@ module.exports = function (args, opt) {
 				set[q].setIdx = q;
 			}
 			log(set);
-			qode.push({
-				seq: seq,
-				set: set
-			});
+			if (file.ext != '.md') {
+				qode.push({
+					seq: seq,
+					set: set
+				});
+			} else {
+				lesson = set;
+			}
 			seq = [];
 			set = [];
 		}
@@ -290,7 +294,11 @@ module.exports = function (args, opt) {
 
 	this.next = () => {
 		log('next');
-		perform();
+		if (stepItr < steps.length) {
+			perform();
+		} else {
+			log('done!');
+		}
 	}
 
 	this.reset = () => {
