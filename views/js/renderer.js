@@ -14,8 +14,7 @@ module.exports = function () {
 	window.Bootstrap = require('bootstrap');
 
 	const __homeDir = require('os').homedir();
-	const __parentDir = path.join(__homeDir + '/Documents/apps/qodemate/views');
-	//	const __parentDir = path.dirname(process.mainModule.filename);
+	const __parentDir = path.dirname(process.mainModule.filename);
 	const log = console.log;
 
 	const Presenter = require('./presenter.js');

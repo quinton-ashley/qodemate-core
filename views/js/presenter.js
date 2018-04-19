@@ -19,7 +19,7 @@ module.exports = function (args, opt) {
 	const copy = promisify(ncp.copy);
 
 	const __homeDir = require('os').homedir();
-	const __parentDir = __homeDir + '/Documents/apps/qodemate/views';
+	const __parentDir = path.dirname(process.mainModule.filename);
 	const __usrDir = __homeDir + '/Documents/Qodemate';
 	const log = console.log;
 

@@ -3,14 +3,18 @@ module.exports = function () {
 		app,
 		BrowserWindow
 	} = require('electron');
+	const path = require('path');
+	const url = require('url');
 
-	const locals = {};
+	const __parentDir = path.dirname(process.mainModule.filename);
+
+	const locals = {
+		title: 'Qodemate',
+		node_modules: ((require.main == module) ? '../../..' : '../../node_modules')
+	};
 	const pug = require('electron-pug')({
 		pretty: true
 	}, locals);
-
-	const path = require('path')
-	const url = require('url')
 
 	// Keep a global reference of the window object, if you don't, the window will
 	// be closed automatically when the JavaScript object is garbage collected.
