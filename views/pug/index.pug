@@ -9,15 +9,15 @@ title= title
 
 body.qm
 nav.navbar.fixed-bottom
-	a.navbar-brand
-		img#logo( height='24')
+	ul.nav.justify-content-left
+		li.nav-item: button#open.nav-link.btn.btn-secondary.qm
+			i.material-icons.md-light folder_open
 	ul.nav.justify-content-center
-		li.nav-item: a#mini.nav-link.qm: i.material-icons.md-light picture_in_picture
-		li.nav-item: a#play.nav-link.qm: i.material-icons.md-light play_arrow
-		li.nav-item: a#next.nav-link.qm: i.material-icons.md-light navigate_next
-		li.nav-item: a#reset.nav-link.qm: i.material-icons.md-light autorenew
+		li.nav-item: button#play.nav-link.btn.btn-secondary.qm.center(style='width:25vw')
+			i.material-icons.md-light play_arrow
 	ul.nav.justify-content-right
-		li.nav-item: a#close.nav-link.qm: i.material-icons.md-light close
+		li.nav-item: button#mini.nav-link.btn.btn-secondary.qm
+			i.material-icons.md-light picture_in_picture
 div.container.row.col-12.m-0.p-0
 	div#presentation.col-12
 script.

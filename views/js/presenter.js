@@ -310,17 +310,26 @@ module.exports = function (args, opt) {
 
 	this.nextSlide = () => {
 		log('next slide');
-		let num = steps[stepItr][0];
-		if (slideItr + 1 < lesson.length && lesson[slideItr + 1].num == num) {
+		if (!usrFiles) {
+			return '# no file or folder selected!';
+		}
+		if (slideItr + 1 < lesson.length &&
+			lesson[slideItr + 1].num == steps[stepItr][0]) {
 			slideItr++;
 			return lesson[slideItr].text;
 		}
 		return 'same';
 	}
 
+	this.play = () => {
+		this.next();
+	}
+
 	this.reset = () => {
 		log('reset');
-		setIdx = -1;
+		for (let i = 0; i < setIdxs.length; i++) {
+			setIdxs[i] = -1;
+		}
 		return 0;
 	}
 

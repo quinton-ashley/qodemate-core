@@ -21,16 +21,33 @@ module.exports = function () {
 	const Presenter = require('./presenter.js');
 	let ent = new Presenter();
 
+	function play() {
+		let slide = ent.nextSlide();
+		log(slide);
+		if (slide != 'same') {
+			$('#presentation').empty();
+			$('#presentation').prepend(md.render(slide));
+		}
+		ent.play();
+	}
+
+	function open() {
+		let proj = dialog.showOpenDialog({
+			properties: ['openFile', 'openDirectory']
+		});
+		ent.open(proj);
+	}
+
+	$('#play').click(play);
+	$('#open').click(open);
+
 	const template = [
 		{
 			label: 'File',
 			submenu: [{
 				label: 'Open',
 				click() {
-					let proj = dialog.showOpenDialog({
-						properties: ['openFile', 'openDirectory']
-					});
-					ent.open(proj);
+					open();
 				}
 			}]
 		}, {
@@ -178,19 +195,4 @@ module.exports = function () {
 
 	const menu = Menu.buildFromTemplate(template);
 	Menu.setApplicationMenu(menu);
-
-	function next() {
-		let slide = ent.nextSlide();
-		if (slide != 'same') {
-			$('#presentation').empty();
-			$('#presentation').prepend(md.render(slide));
-		}
-		ent.next();
-	}
-
-	$('#close').click(ent.close);
-	$('#next').click(next);
-	$('#play').click(ent.play);
-	$('#reset').click(ent.reset);
-
 };
