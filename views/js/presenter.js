@@ -32,6 +32,7 @@ module.exports = function (args, opt) {
 	let lesson = [];
 	let steps = [];
 	let setIdxs = [];
+	let slideItr = -1;
 	let stepItr = 0;
 	let files, usrDir, usrFiles;
 
@@ -47,13 +48,11 @@ module.exports = function (args, opt) {
 			open(usrDir, {
 				app: 'brackets'
 			});
-			for (let i = 0; i < files.length; i++) {
-				usrFiles.push(usrDir + '/' + path.relative(project[0], files[i]));
-				fs.outputFile(usrFiles[i], '');
-			}
 		} else {
 			files = project;
 		}
+
+		let foundLesson = 0;
 
 		for (let i = 0; i < files.length; i++) {
 			let lines, match, mod, prevMatch, tag, tags, text, primarySeqIdx, regex, splitStr;
@@ -77,7 +76,9 @@ module.exports = function (args, opt) {
 					splitStr = '//';
 					regex = /\n^.*\/\/\d[^\n]*/gm;
 			}
-			if (file.ext != '.md') {
+			if (file.base != 'lesson.md') {
+				usrFiles.push(usrDir + '/' + path.relative(project[0], files[i]));
+				fs.outputFile(usrFiles[i - foundLesson], '');
 				setIdxs.push(-1);
 			}
 			let tagRegex = /([^ \w][^\);]+[\);]|[a-zA-Z][^ a-zA-Z]*|[\d\.]+)/g;
@@ -134,7 +135,7 @@ module.exports = function (args, opt) {
 							//   purposes if the program were to try to print a delete step part somehow.
 							cur = {
 								lines: ((k == 0) ? lines : -lines),
-								num: Number(tag),
+								num: Number(tag).toFixed(2),
 								opt: ((k == 0) ? {} : {
 									d: primarySeqIdx
 								}),
@@ -142,9 +143,8 @@ module.exports = function (args, opt) {
 								setIdx: -1,
 								text: ((k == 0) ? text : 'd')
 							};
-							let stepNumStr = cur.num.toFixed(2);
-							if (!(stepNumStr in steps)) {
-								steps[stepNumStr] = i;
+							if ((file.ext != '.md') && (!(cur.num in steps))) {
+								steps[cur.num] = i - foundLesson;
 							}
 						}
 					}
@@ -172,7 +172,13 @@ module.exports = function (args, opt) {
 					set: set
 				});
 			} else {
-				lesson = set;
+				for (q = 0; q < set.length; q++) {
+					lesson.push({
+						num: set [q].num,
+						text: set [q].text
+					});
+				}
+				foundLesson = 1;
 			}
 			seq = [];
 			set = [];
@@ -182,6 +188,7 @@ module.exports = function (args, opt) {
 		steps.sort(function (a, b) {
 			return Number(a[0]) - Number(b[0]);
 		});
+		log('step numbers');
 		log(steps);
 
 		bot.focusOnApp();
@@ -299,6 +306,16 @@ module.exports = function (args, opt) {
 		} else {
 			log('done!');
 		}
+	}
+
+	this.nextSlide = () => {
+		log('next slide');
+		let num = steps[stepItr][0];
+		if (slideItr + 1 < lesson.length && lesson[slideItr + 1].num == num) {
+			slideItr++;
+			return lesson[slideItr].text;
+		}
+		return 'same';
 	}
 
 	this.reset = () => {

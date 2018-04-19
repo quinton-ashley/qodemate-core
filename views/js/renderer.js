@@ -30,7 +30,6 @@ module.exports = function () {
 					let proj = dialog.showOpenDialog({
 						properties: ['openFile', 'openDirectory']
 					});
-					log(proj);
 					ent.open(proj);
 				}
 			}]
@@ -157,21 +156,6 @@ module.exports = function () {
       ]
 		})
 
-		// Edit menu
-		template[2].submenu.push({
-			type: 'separator'
-		}, {
-			label: 'Speech',
-			submenu: [
-				{
-					role: 'startspeaking'
-				},
-				{
-					role: 'stopspeaking'
-				}
-        ]
-		})
-
 		// Window menu
 		template[4].submenu = [
 			{
@@ -195,21 +179,17 @@ module.exports = function () {
 	const menu = Menu.buildFromTemplate(template);
 	Menu.setApplicationMenu(menu);
 
-	//		let mark = __parentDir + '/../usr/test0.md';
-	//		let file = fs.readFile(mark, 'utf8', (err, data) => {
-	//		if (err) {
-	//		log(err);
-	//		}
-	//		res.render('index', {
-	//		title: 'Hey',
-	//		md: md.render(data.toString())
-	//		});
-	//		});
-	//		});
-	//		});
+	function next() {
+		let slide = ent.nextSlide();
+		if (slide != 'same') {
+			$('#presentation').empty();
+			$('#presentation').prepend(md.render(slide));
+		}
+		ent.next();
+	}
 
 	$('#close').click(ent.close);
-	$('#next').click(ent.next);
+	$('#next').click(next);
 	$('#play').click(ent.play);
 	$('#reset').click(ent.reset);
 
