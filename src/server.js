@@ -1,16 +1,21 @@
-module.exports = function () {
+module.exports = function (args, opt, cb) {
 	const {
 		app,
 		BrowserWindow
 	} = require('electron');
+	const fs = require('fs');
 	const path = require('path');
 	const url = require('url');
 
+	const isDev = !fs.existsSync(__dirname + '/../../node_modules');
 	const __parentDir = path.dirname(process.mainModule.filename);
+	const log = console.log;
+
+	log('dev: ' + isDev);
 
 	const locals = {
 		title: 'Qodemate',
-		node_modules: ((require.main == module) ? '../../..' : '../../node_modules')
+		node_modules: ((!isDev) ? '../../..' : '../../node_modules')
 	};
 	const pug = require('electron-pug')({
 		pretty: true
