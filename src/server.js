@@ -7,7 +7,7 @@ module.exports = function (args, opt, cb) {
 	const path = require('path');
 	const url = require('url');
 
-	const isDev = !fs.existsSync(__dirname + '/../../node_modules');
+	const isDev = !fs.existsSync(__dirname + '/../../../node_modules');
 	const __parentDir = path.dirname(process.mainModule.filename);
 	const log = console.log;
 
