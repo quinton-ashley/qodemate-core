@@ -4,7 +4,7 @@ module.exports = function () {
 		dialog,
 		Menu
 	} = require('electron').remote;
-	const fs = require('fs-extra'); // open source library adds functionality to standard node.js fs
+	const fs = require('fs-extra');
 	const md = require('markdown-it')();
 	const path = require('path');
 	const $ = require('jquery');
@@ -15,6 +15,7 @@ module.exports = function () {
 
 	const __homeDir = require('os').homedir();
 	const __parentDir = path.dirname(process.mainModule.filename);
+	const err = console.err;
 	const log = console.log;
 
 	const Presenter = require('./presenter.js');
@@ -32,7 +33,7 @@ module.exports = function () {
 
 	function open() {
 		let proj = dialog.showOpenDialog({
-			properties: ['openFile', 'openDirectory']
+			properties: ['openDirectory']
 		});
 		ent.open(proj);
 	}
