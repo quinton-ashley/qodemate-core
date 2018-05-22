@@ -26,10 +26,16 @@ module.exports = function(args, opt) {
   const log = console.log;
 
   let check = false;
-  let setIdx = -1; // the set index
-  let seq = []; // the sequence array stores step parts in the order they occur in the file(s)
-  let set = []; // the set array stores step parts in sorted order, maintaing sequence order of step parts of the same number
-  let slides = []; // the slides array stores the markdown text associated with each step to be displayed as a slide if the user includes a slides.md file
+  // the set index
+  let setIdx = -1;
+  // the sequence array stores step parts in the order they occur in the file(s)
+  let seq = [];
+  // the set array stores step parts in sorted order, maintaing sequence order
+  // of step parts of the same number
+  let set = [];
+  // the slides array stores the markdown text associated with each step to
+  // be displayed as a slide if the user includes a slides.md file
+  let slides = [];
   let qode = [];
   let lesson = [];
   let steps = [];
@@ -48,7 +54,7 @@ module.exports = function(args, opt) {
     usrFiles = [];
     if (fs.lstatSync(project[0]).isDirectory()) {
       // implement custom file search from .qodeignore project file
-      ig = ignore().add(['test0.js']);
+      ig = ignore().add(['.DS_Store']);
       try {
         //				const filterFn = item => ig.ignores(item);
         files = klawSync(project[0]);
@@ -82,7 +88,8 @@ module.exports = function(args, opt) {
     let foundLesson = 0;
 
     for (let i = 0; i < files.length; i++) {
-      let lines, match, mod, prevMatch, tag, tags, text, primarySeqIdx, regex, splitStr;
+      let lines, match, mod, prevMatch, tag, tags;
+      let text, primarySeqIdx, regex, splitStr;
       let file = files[i];
       let data = fs.readFileSync(file, 'utf8');
       let loop = true;
@@ -112,9 +119,11 @@ module.exports = function(args, opt) {
           loop = false;
         }
         if (prevMatch != null) {
-          // the text of this step goes from the start of prevMatch to the start of match
-          // if loop is false (this is the end of the file) add another line
-          text = data.slice(prevMatch.index, match.index) + ((loop) ? '' : '\n');
+          // the text of this step goes from the start of prevMatch to the
+          // start of match if loop is false (this is the end of the file)
+          // add another line
+          text = data.slice(prevMatch.index, match.index);
+          text += ((loop) ? '' : '\n');
           // if no new line char/char seqence is found then line length is 1
           lines = (text.match(/\r\n|\r|\n/g) || [1]).length;
           // the first line of the step, split and pop after the splitStr
@@ -145,16 +154,20 @@ module.exports = function(args, opt) {
                 set.push(cur);
               }
               // file: index of the file
-              // lines: the number of lines the step has or the number of lines to remove
-              // num: the step number tag string must be converted to a js Number
-              // opt: assigned an empty object if k is 0, else assigned the delete option
-              //   with step num primarySeqIdx, the seqIdx of the first step
+              // lines: the number of lines the step has or the number of lines
+              //   to remove
+              // num: the step number tag string must be converted to a
+              //   js Number
+              // opt: assigned an empty object if k is 0, else assigned the
+              //   delete option with step num primarySeqIdx, the seqIdx of
+              //   the first step
               // seqIdx: j, the seqence index of the step part in the file
-              // setIdx: set index is the index of the step part in an ordered list of all
-              //   step parts.  -1 is a placeholder, a proper value is assigned after the set
-              //   array is sorted.
-              // text: the text of the step part. 'd' for delete, was/is useful for debugging
-              //   purposes if the program were to try to print a delete step part somehow.
+              // setIdx: set index is the index of the step part in an ordered
+              //   list of all step parts.  -1 is a placeholder, a proper value
+              //   is assigned after the set array is sorted.
+              // text: the text of the step part. 'd' for delete, was/is useful
+              //   for debugging purposes if the program were to try to print
+              //   a delete step part somehow.
               cur = {
                 lines: ((k == 0) ? lines : -lines),
                 num: Number(tag).toFixed(2),
@@ -267,7 +280,7 @@ module.exports = function(args, opt) {
 
   async function performPart() {
     if (setIdx + 1 >= set.length) {
-      log('ERROR: ' + (setIdx + 1) + ' is outside the bounds of set ' + set.length);
+      log('ERROR: ' + (setIdx + 1) + ' overflow of set length ' + set.length);
       log(set);
       check = false;
       return false;
