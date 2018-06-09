@@ -1,26 +1,16 @@
-module.exports = function(args, opt) {
+module.exports = function(opt) {
   const {
     app
   } = require('electron').remote;
-  const bot = require('./bot.js');
-  const delay = function(delay) {
-    return new Promise(function(fulfill) {
-      setTimeout(fulfill, delay)
-    });
-  }
+  const bot = opt.bot;
+  const delay = require('delay');
   const fs = require('fs-extra');
   const ignore = require('ignore');
   const klawSync = require('klaw-sync');
-  const ncp = require('copy-paste');
   const open = require('opn');
   const path = require('path');
-  const {
-    promisify
-  } = require('util');
-  const copy = promisify(ncp.copy);
 
   const __homeDir = require('os').homedir();
-  const __parentDir = path.dirname(process.mainModule.filename);
   const __usrDir = __homeDir + '/Documents/Qodemate';
   const err = console.error;
   const log = console.log;
@@ -54,17 +44,17 @@ module.exports = function(args, opt) {
     usrFiles = [];
     if (fs.lstatSync(project[0]).isDirectory()) {
       // implement custom file search from .qodeignore project file
+      // let topFiles = fs.readdirSync(project[0]);
+      // for (let i = 0; i < topFiles.length; i++) {
+      //   topFiles[i] = topFiles[i].path;
+      // }
       ig = ignore().add(['.DS_Store']);
-      try {
-        //				const filterFn = item => ig.ignores(item);
-        files = klawSync(project[0]);
-        for (let i = 0; i < files.length; i++) {
-          files[i] = files[i].path;
-        }
-        files = ig.filter(files);
-      } catch (er) {
-        err(er);
+      //				const filterFn = item => ig.ignores(item);
+      files = klawSync(project[0]);
+      for (let i = 0; i < files.length; i++) {
+        files[i] = files[i].path;
       }
+      files = ig.filter(files);
       log(files);
 
       usrDir = __usrDir + '/' + path.parse(project[0]).name;
@@ -233,7 +223,9 @@ module.exports = function(args, opt) {
     log('step numbers');
     log(steps);
 
-    bot.focusOnApp();
+    if (bot) {
+      bot.focusOnApp();
+    }
   }
 
   function countLines(cur, init, dest) {
@@ -316,7 +308,7 @@ module.exports = function(args, opt) {
       } else {
         textToPaste = cur.text;
       }
-      await copy(textToPaste);
+      await bot.copy(textToPaste);
       bot.paste();
       return true;
     } else {

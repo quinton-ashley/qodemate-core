@@ -1,6 +1,0 @@
-{
-	"ide": "eclipse",
-	"ignore": [
-		"bin/*"
-	]
-}

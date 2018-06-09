@@ -1,6 +1,0 @@
-{
-	"ide": "brackets",
-	"ignore": [
-		"node_modules/*"
-	]
-}
