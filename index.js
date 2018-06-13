@@ -4,14 +4,12 @@ module.exports = function(opt) {
   } = require('electron').remote;
   const bot = opt.bot;
   const delay = require('delay');
-  const fs = require('fs');
+  const fs = require('fs-extra');
   const ignore = require('ignore');
   const klawSync = require('klaw-sync');
   const open = require('opn');
   const path = require('path');
 
-  const __homeDir = require('os').homedir();
-  const __usrDir = __homeDir + '/Documents/Qodemate';
   const err = console.error;
   const log = console.log;
 
@@ -60,9 +58,17 @@ module.exports = function(opt) {
       usrDir = __usrDir + '/' + path.parse(project[0]).name;
       log(usrDir);
       fs.copySync(project[0], usrDir);
-      open(usrDir, {
-        app: 'brackets'
-      });
+      // if there is a package.json open the main file
+
+      // else find the first file in the chosen language
+      for (let i = 0; i < files.length; i++) {
+        if (path.parse(files[i]).ext == '.js') {
+          open(usrDir, {
+            app: 'atom'
+          });
+          break;
+        }
+      }
     }
     // single file open
     //		else {
@@ -224,7 +230,7 @@ module.exports = function(opt) {
     log(steps);
 
     if (bot) {
-      bot.focusOnApp();
+      bot.focusOnQodemate();
     }
   }
 
@@ -319,7 +325,7 @@ module.exports = function(opt) {
 
   async function perform() {
     let fIdx = steps[stepItr][1];
-    bot.focusOnFile(usrFiles[fIdx]);
+    await bot.focusOnFile(usrFiles[fIdx], 'atom');
     seq = qode[fIdx].seq;
     set = qode[fIdx].set;
     setIdx = setIdxs[fIdx];
@@ -329,7 +335,7 @@ module.exports = function(opt) {
     }
     setIdxs[fIdx] = setIdx;
     stepItr++;
-    bot.focusOnApp();
+    bot.focusOnQodemate();
   }
 
   this.next = () => {
