@@ -1,4 +1,7 @@
 module.exports = function(opt) {
+  const err = console.error;
+  const log = console.log;
+
   const {
     app
   } = require('electron').remote;
@@ -9,9 +12,6 @@ module.exports = function(opt) {
   const klawSync = require('klaw-sync');
   const open = require('opn');
   const path = require('path');
-
-  const err = console.error;
-  const log = console.log;
 
   let check = false;
   // the set index
@@ -28,25 +28,27 @@ module.exports = function(opt) {
   let lesson = [];
   let steps = [];
   let setIdxs = [];
+  let exclude = [];
+  let usrFiles = [];
   let slideItr = -1;
   let stepItr = 0;
-  let exclude = [];
-  let env, files, ig, usrDir, usrFiles, topFiles;
+  let env, ig, proj;
+  let tagRegex = /([^ \w][^\);]+[\);]|[a-zA-Z][^ a-zA-Z]*|[\d\.]+)/g;
+  this.app = 'Atom';
 
-  this.open = (project) => {
+  this.open = async function(project) {
     if (!project) {
       return;
     }
     log(project);
-    files = [];
-    usrFiles = [];
+    let files = [];
     if (fs.lstatSync(project[0]).isDirectory()) {
       // implement custom file search from .qodeignore project file
       // let topFiles = fs.readdirSync(project[0]);
       // for (let i = 0; i < topFiles.length; i++) {
       //   topFiles[i] = topFiles[i].path;
       // }
-      ig = ignore().add(['.DS_Store']);
+      ig = ignore().add(['.DS_Store', 'bin']);
       //				const filterFn = item => ig.ignores(item);
       files = klawSync(project[0]);
       for (let i = 0; i < files.length; i++) {
@@ -55,17 +57,19 @@ module.exports = function(opt) {
       files = ig.filter(files);
       log(files);
 
-      usrDir = __usrDir + '/' + path.parse(project[0]).name;
-      log(usrDir);
-      fs.copySync(project[0], usrDir);
+      proj = __usrDir + '/' + path.parse(project[0]).name;
+      log(proj);
+      fs.copySync(project[0], proj);
       // if there is a package.json open the main file
 
       // else find the first file in the chosen language
       for (let i = 0; i < files.length; i++) {
         if (path.parse(files[i]).ext == '.js') {
-          open(usrDir, {
-            app: 'atom'
-          });
+          bot.openProject(proj, 'js');
+          break;
+        }
+        if (path.parse(files[i]).ext == '.java') {
+          bot.openProject(proj, 'java');
           break;
         }
       }
@@ -84,144 +88,16 @@ module.exports = function(opt) {
     let foundLesson = 0;
 
     for (let i = 0; i < files.length; i++) {
-      let lines, match, mod, prevMatch, tag, tags;
-      let text, primarySeqIdx, regex, splitStr;
-      let file = files[i];
-      let data = fs.readFileSync(file, 'utf8');
-      let loop = true;
-      // parse files of different languages
-      // splitStr is the comment syntax for that language
-      file = path.parse(file);
-      switch (file.ext) {
-        case '.css':
-          splitStr = '/*';
-          regex = /\n^.*\/\*\d[^\n]*/gm;
-        case '.md':
-        case '.markdown':
-        case '.c':
-        case '.js':
-        case '.java':
-        case '.h':
-        case '.m':
-          splitStr = '//';
-          regex = /\n^.*\/\/\d[^\n]*/gm;
-      }
-      let tagRegex = /([^ \w][^\);]+[\);]|[a-zA-Z][^ a-zA-Z]*|[\d\.]+)/g;
-      for (let j = -1; loop; j++, primarySeqIdx = j) {
-        if (((match = regex.exec(data)) == null)) {
-          match = {
-            index: data.length - 1
-          };
-          loop = false;
-        }
-        if (prevMatch != null) {
-          // the text of this step goes from the start of prevMatch to the
-          // start of match if loop is false (this is the end of the file)
-          // add another line
-          text = data.slice(prevMatch.index, match.index);
-          text += ((loop) ? '' : '\n');
-          // if no new line char/char seqence is found then line length is 1
-          lines = (text.match(/\r\n|\r|\n/g) || [1]).length;
-          // the first line of the step, split and pop after the splitStr
-          // to get the tags, then get the individual tags with tagRegex
-          tags = prevMatch[0].split(splitStr).pop().match(tagRegex);
-          // there are three types of tag: step number, editor, and option
-          // cur will change if more than one step number tag is found
-          let cur;
-          for (let k = 0; k < tags.length; k++) {
-            tag = tags[k];
-            if (/[^ \w][^\);]+[\);]/.test(tag)) {
-              // test for editor tags
-              cur.lines = 0;
-              cur.text = tag;
-            } else if (/[a-zA-Z][^ a-zA-Z]*/.test(tag)) {
-              // test for any option tag
-              cur.opt[tag[0]] = tag.slice(1);
-            } else if (/[\d\.]+/.test(tag)) {
-              // the first tag will always be the step number tag, so cur will
-              // be assigned to the object created below this if statement
-              // if another step number tag is found then the current step is
-              // complete and is pushed to the arrays seq and set
-              // the seqIdx, j, is increased and the old cur is replaced by the
-              // object created after the if statement
-              if (k > 0) {
-                cur.seqIdx = j++;
-                seq.push(cur);
-                set.push(cur);
-              }
-              // file: index of the file
-              // lines: the number of lines the step has or the number of lines
-              //   to remove
-              // num: the step number tag string must be converted to a
-              //   js Number
-              // opt: assigned an empty object if k is 0, else assigned the
-              //   delete option with step num primarySeqIdx, the seqIdx of
-              //   the first step
-              // seqIdx: j, the seqence index of the step part in the file
-              // setIdx: set index is the index of the step part in an ordered
-              //   list of all step parts.  -1 is a placeholder, a proper value
-              //   is assigned after the set array is sorted.
-              // text: the text of the step part. 'd' for delete, was/is useful
-              //   for debugging purposes if the program were to try to print
-              //   a delete step part somehow.
-              cur = {
-                lines: ((k == 0) ? lines : -lines),
-                num: Number(tag).toFixed(2),
-                opt: ((k == 0) ? {} : {
-                  d: primarySeqIdx
-                }),
-                seqIdx: j,
-                setIdx: -1,
-                text: ((k == 0) ? text : 'd')
-              };
-              if ((file.ext != '.md') && (!(cur.num in steps))) {
-                steps[cur.num] = i - foundLesson;
-              }
-            }
-          }
-          seq.push(cur);
-          set.push(cur);
-          prevMatch = match;
-        } else {
-          prevMatch = match;
-        }
-      }
-      if (set) {
-        if (file.base != 'lesson.md') {
-          usrFiles.push(usrDir + '/' + path.relative(project[0], files[i]));
-          fs.outputFile(usrFiles[i - foundLesson], '');
-          setIdxs.push(-1);
-        }
-        // sort from least to greatest step number
-        set.sort((a, b) => {
-          if (a.num < b.num) return -1;
-          if (a.num > b.num) return 1;
-          return a.seqIdx - b.seqIdx;
-        });
-        // setIdx is assigned it's proper value after the sort
-        for (let q = 0; q < set.length; q++) {
-          set[q].setIdx = q;
-        }
-        log(set);
-        if (file.ext != '.md') {
-          qode.push({
-            seq: seq,
-            set: set
-          });
-        } else {
-          for (q = 0; q < set.length; q++) {
-            lesson.push({
-              num: set [q].num,
-              text: set [q].text
-            });
-          }
-          foundLesson = 1;
-        }
-        seq = [];
-        set = [];
+      let data = fs.readFileSync(files[i], 'utf8');
+      let retVal = await parseFile(files[i], data, i - foundLesson);
+      if (!retVal) {
+        usrFiles.push(proj + '/' + path.relative(project[0], files[i]));
+        fs.outputFile(usrFiles[i - foundLesson], '');
+        setIdxs.push(-1);
+      } else if (retVal == 1) {
+        foundLesson = 1;
       }
     }
-
     steps = Object.entries(steps);
     steps.sort(function(a, b) {
       return Number(a[0]) - Number(b[0]);
@@ -232,6 +108,134 @@ module.exports = function(opt) {
     if (bot) {
       bot.focusOnQodemate();
     }
+  }
+
+  async function parseFile(file, data, index) {
+    let lines, match, mod, prevMatch, tag, tags;
+    let text, primarySeqIdx, isLesson, regex, splitStr;
+    let loop = true;
+    // parse files of different languages
+    // splitStr is the comment syntax for that language
+    file = path.parse(file);
+    switch (file.ext) {
+      case '.css':
+        splitStr = '/*';
+        regex = /\n^.*\/\*\d[^\n]*/gm;
+        break;
+      default:
+        splitStr = '//';
+        regex = /\n^.*\/\/\d[^\n]*/gm;
+    }
+    for (let j = -1; loop; j++, primarySeqIdx = j) {
+      if (((match = regex.exec(data)) == null)) {
+        match = {
+          index: data.length - 1
+        };
+        loop = false;
+      }
+      if (prevMatch != null) {
+        // the text of this step goes from the start of prevMatch to the
+        // start of match if loop is false (this is the end of the file)
+        // add another line
+        text = data.slice(prevMatch.index, match.index);
+        text += ((loop) ? '' : '\n');
+        // if no new line char/char seqence is found then line length is 1
+        lines = (text.match(/\r\n|\r|\n/g) || [1]).length;
+        // the first line of the step, split and pop after the splitStr
+        // to get the tags, then get the individual tags with tagRegex
+        tags = prevMatch[0].split(splitStr).pop().match(tagRegex);
+        // there are three types of tag: step number, editor, and option
+        // cur will change if more than one step number tag is found
+        let cur;
+        for (let k = 0; k < tags.length; k++) {
+          tag = tags[k];
+          if (/[^ \w][^\);]+[\);]/.test(tag)) {
+            // test for editor tags
+            cur.lines = 0;
+            cur.text = tag;
+          } else if (/[a-zA-Z][^ a-zA-Z]*/.test(tag)) {
+            // test for any option tag
+            cur.opt[tag[0]] = tag.slice(1);
+          } else if (/[\d\.]+/.test(tag)) {
+            // the first tag will always be the step number tag, so cur will
+            // be assigned to the object created below this if statement
+            // if another step number tag is found then the current step is
+            // complete and is pushed to the arrays seq and set
+            // the seqIdx, j, is increased and the old cur is replaced by the
+            // object created after the if statement
+            if (k > 0) {
+              cur.seqIdx = j++;
+              seq.push(cur);
+              set.push(cur);
+            }
+            // file: index of the file
+            // lines: the number of lines the step has or the number of lines
+            //   to remove
+            // num: the step number tag string must be converted to a
+            //   js Number
+            // opt: assigned an empty object if k is 0, else assigned the
+            //   delete option with step num primarySeqIdx, the seqIdx of
+            //   the first step
+            // seqIdx: j, the seqence index of the step part in the file
+            // setIdx: set index is the index of the step part in an ordered
+            //   list of all step parts.  -1 is a placeholder, a proper value
+            //   is assigned after the set array is sorted.
+            // text: the text of the step part. 'd' for delete, was/is useful
+            //   for debugging purposes if the program were to try to print
+            //   a delete step part somehow.
+            cur = {
+              lines: ((k == 0) ? lines : -lines),
+              num: Number(tag).toFixed(2),
+              opt: ((k == 0) ? {} : {
+                d: primarySeqIdx
+              }),
+              seqIdx: j,
+              setIdx: -1,
+              text: ((k == 0) ? text : 'd')
+            };
+            if ((file.ext != '.md') && (!(cur.num in steps))) {
+              steps[cur.num] = index;
+            }
+          }
+        }
+        seq.push(cur);
+        set.push(cur);
+        prevMatch = match;
+      } else {
+        prevMatch = match;
+      }
+    }
+    if (set) {
+      // sort from least to greatest step number
+      set.sort((a, b) => {
+        if (a.num < b.num) return -1;
+        if (a.num > b.num) return 1;
+        return a.seqIdx - b.seqIdx;
+      });
+      // setIdx is assigned it's proper value after the sort
+      for (let q = 0; q < set.length; q++) {
+        set[q].setIdx = q;
+      }
+      log(set);
+      if (file.ext != '.md') {
+        qode.push({
+          seq: seq,
+          set: set
+        });
+      } else {
+        for (q = 0; q < set.length; q++) {
+          lesson.push({
+            num: set [q].num,
+            text: set [q].text
+          });
+        }
+        isLesson = 1;
+      }
+      seq = [];
+      set = [];
+      return isLesson;
+    }
+    return -1;
   }
 
   function countLines(cur, init, dest) {
