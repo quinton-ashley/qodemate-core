@@ -10,12 +10,11 @@
     }
   ],
   "dependencies": {
-    "delay": "^3.0.0",
-    "fs-extra": "^4.0.3",
-    "gitignore-templates": "0.0.3",
-    "ignore": "^3.3.8",
-    "klaw-sync": "^3.0.2",
-    "opn": "^5.3.0"
+    "fs-extra": "*",
+    "gitignore-templates": "*",
+    "ignore": "*",
+    "klaw-sync": "*",
+    "opn": "*"
   },
   "description": "This is the core of Qodemate that can be easily updated without users having to reinstall the Qodemate native elctron app!",
   "keywords": [
@@ -39,5 +38,5 @@
     "version": "git add -A",
     "postversion": "git remote | xargs -L1 git push --all && git push --tags && npm publish"
   },
-  "version": "0.0.22"
+  "version": "0.1.0"
 }
