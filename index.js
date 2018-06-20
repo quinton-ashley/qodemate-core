@@ -1,3 +1,9 @@
+/*
+ * qodemate-core contains the file parser, the core algorithm of Qodemate
+ * the methods of this file use bot.js to present the user's project
+ * authors: quinton-ashley
+ * copyright 2018
+ */
 module.exports = function(opt) {
   const err = console.error;
   const log = console.log;
@@ -32,11 +38,10 @@ module.exports = function(opt) {
   let usrFiles = [];
   let slideItr = -1;
   let stepItr = 0;
-  let env, ig, proj;
+  let env, ig, proj, linkedApp;
   let tagRegex = /([^ \w][^\);]+[\);]|[a-zA-Z][^ a-zA-Z]*|[\d\.]+)/g;
-  this.app = 'Atom';
 
-  this.open = async function(project) {
+  this.open = async function(project, apps) {
     if (!project) {
       return;
     }
@@ -60,21 +65,16 @@ module.exports = function(opt) {
       proj = __usrDir + '/' + path.parse(project[0]).name;
       log(proj);
       fs.copySync(project[0], proj);
-      // if there is a package.json open the main file
 
-      // else find the first file in the chosen language
+      // this is a preliminary, rudimentary way of finding
+      // out which app to use for what language
       for (let i = 0; i < files.length; i++) {
-        if (path.parse(files[i]).ext == '.js') {
-          bot.openProject(proj, 'js');
-          break;
-        }
-        if (path.parse(files[i]).ext == '.java') {
-          bot.openProject(proj, 'java');
-          break;
-        }
+        let lang = path.parse(files[i]).ext.slice(1);
+        linkedApp = bot.openProject(proj, lang, apps);
+        if (linkedApp) break;
       }
     }
-    // single file open
+    // single file open, I'm currently not allowing this
     //		else {
     //			files = project;
     //			let pDir = path.dirname(project[0]);
