@@ -14,6 +14,8 @@ module.exports = function(opt) {
   const bot = opt.bot;
   const delay = require('delay');
   const fs = require('fs-extra');
+  const parseIgnore = require('gitignore-globs');
+  const gitigTemplates = require('../lib/gitignore-templates');
   const ignore = require('ignore');
   const klawSync = require('klaw-sync');
   const open = require('opn');
@@ -38,7 +40,7 @@ module.exports = function(opt) {
   let usrFiles = [];
   let slideItr = -1;
   let stepItr = 0;
-  let env, ig, proj, linkedApp;
+  let env, proj, linkedApp;
   let tagRegex = /([^ \w][^\);]+[\);]|[a-zA-Z][^ a-zA-Z]*|[\d\.]+)/g;
 
   this.open = async function(project, apps) {
@@ -53,12 +55,14 @@ module.exports = function(opt) {
       // for (let i = 0; i < topFiles.length; i++) {
       //   topFiles[i] = topFiles[i].path;
       // }
-      ig = ignore().add(['.DS_Store', 'bin']);
       //				const filterFn = item => ig.ignores(item);
       files = klawSync(project[0]);
       for (let i = 0; i < files.length; i++) {
         files[i] = files[i].path;
       }
+      let ig = parseIgnore(gitigTemplates('Java'));
+      ig.push('.DS_Store');
+      ig = ignore().add(ig);
       files = ig.filter(files);
       log(files);
 

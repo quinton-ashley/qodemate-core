@@ -15,7 +15,8 @@
     "gitignore-templates": "^0.0.3",
     "ignore": "^4.0.2",
     "klaw-sync": "^4.0.0",
-    "opn": "^5.3.0"
+    "opn": "^5.3.0",
+    "gitignore-globs": "^0.1.1"
   },
   "description": "This is the core of Qodemate that can be easily updated without users having to reinstall the Qodemate native elctron app!",
   "keywords": [
@@ -36,8 +37,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "up-outdated": "npm install --save $(npm outdated | cut -d ' ' -f -1 | sed '1d' | sed 's/$/@*/')",
     "version": "git add -A",
     "postversion": "git remote | xargs -L1 git push --all && git push --tags && npm publish"
   },
-  "version": "0.1.2"
+  "version": "0.1.3"
 }
