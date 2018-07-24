@@ -56,7 +56,9 @@ module.exports = function(opt) {
       //   topFiles[i] = topFiles[i].path;
       // }
       //				const filterFn = item => ig.ignores(item);
-      files = klawSync(project[0]);
+      files = klawSync(project[0], {
+        nodir: true
+      });
       for (let i = 0; i < files.length; i++) {
         files[i] = files[i].path;
       }
@@ -74,9 +76,10 @@ module.exports = function(opt) {
       // out which app to use for what language
       for (let i = 0; i < files.length; i++) {
         let lang = path.parse(files[i]).ext.slice(1);
-        linkedApp = bot.openProject(proj, lang, apps);
+        linkedApp = await bot.openProject(proj, lang, apps);
         if (linkedApp) break;
       }
+      log('using app: ' + linkedApp.name);
     }
     // single file open, I'm currently not allowing this
     //		else {
