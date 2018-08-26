@@ -1,45 +1,46 @@
 {
-  "author": "Quinton Ashley",
-  "bugs": {
-    "url": "https://github.com/quinton-ashley/qodemate-core/issues"
-  },
-  "contributors": [
-    {
-      "name": "Quinton Ashley",
-      "email": "qashto@gmail.com"
-    }
-  ],
-  "dependencies": {
-    "delay": "^3.0.0",
-    "fs-extra": "^6.0.1",
-    "gitignore-templates": "^0.0.3",
-    "ignore": "^4.0.2",
-    "klaw-sync": "^4.0.0",
-    "opn": "^5.3.0",
-    "gitignore-globs": "^0.1.1"
-  },
-  "description": "This is the core of Qodemate that can be easily updated without users having to reinstall the Qodemate native elctron app!",
-  "keywords": [
-    "app"
-  ],
-  "license": "UNLICENSED",
-  "main": "index.js",
-  "maintainers": [
-    {
-      "name": "Quinton Ashley",
-      "email": "qashto@gmail.com"
-    }
-  ],
-  "name": "qodemate-core",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/quinton-ashley/qodemate-core"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "up-outdated": "npm install --save $(npm outdated | cut -d ' ' -f -1 | sed '1d' | sed 's/$/@*/')",
-    "version": "git add -A",
-    "postversion": "git remote | xargs -L1 git push --all && git push --tags && npm publish"
-  },
-  "version": "0.1.4"
+	"author": "Quinton Ashley",
+	"bugs": {
+		"url": "https://github.com/quinton-ashley/qodemate-core/issues"
+	},
+	"contributors": [
+		{
+			"name": "Quinton Ashley",
+			"email": "qashto@gmail.com"
+		}
+	],
+	"dependencies": {
+		"delay": "^3.0.0",
+		"fs-extra": "^7.0.0",
+		"gitignore-globs": "^0.1.1",
+		"gitignore-templates": "0.0.6",
+		"ignore": "^5.0.2",
+		"klaw-sync": "^4.0.0",
+		"opn": "^5.3.0"
+	},
+	"description": "This is the core of Qodemate that can be easily updated without users having to reinstall the Qodemate native elctron app!",
+	"keywords": [
+		"app"
+	],
+	"license": "UNLICENSED",
+	"main": "index.js",
+	"maintainers": [
+		{
+			"name": "Quinton Ashley",
+			"email": "qashto@gmail.com"
+		}
+	],
+	"name": "qodemate-core",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/quinton-ashley/qodemate-core"
+	},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"premiere": "O='{\"name\":\"'$npm_package_name'\",\"description\":\"'$npm_package_description'\",\"license_template\":\"'$npm_package_license'\"}' && echo \"${O}\" && curl -u $npm_package_author_name https://api.github.com/user/repos -d \"${O}\" && git init && git add -A && git commit -m $npm_package_version && git remote add origin 'https://github.com/'$npm_package_author_name'/'$npm_package_name'.git' && git pull origin master --allow-unrelated-histories --no-edit -q && git push --set-upstream origin master && git push && git push --tags",
+		"up-outdated": "npm install --save $(npm outdated | cut -d ' ' -f -1 | sed '1d' | sed 's/$/@*/')",
+		"version": "git add -A",
+		"postversion": "git remote | xargs -L1 git push --all && git push --tags && npm publish"
+	},
+	"version": "0.1.5"
 }
