@@ -138,12 +138,13 @@ module.exports = function(opt) {
 			case '.js':
 			case '.java':
 			case '.pde':
+			case '.md':
 				splitStr = /\n*\s*\/\//gm;
 				qommentRegex = /(\n*\s*\/\/\d[^\n]*)+/gm;
 				regex = /(\n|^)^.*(\n*\s*\/\/\d[^\n]*)+/gm;
 				break;
 			default:
-				log('ignoring file: ' + file);
+				log(`ignoring file: ${file.dir}/${file.base}`);
 				return 2;
 		}
 		for (let j = -1; loop; j++, primarySeqIdx = j) {
