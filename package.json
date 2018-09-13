@@ -15,6 +15,7 @@
 		"gitignore-globs": "^0.1.1",
 		"gitignore-templates": "0.0.6",
 		"ignore": "^5.0.2",
+		"klaw": "^3.0.0",
 		"klaw-sync": "^4.0.0",
 		"opn": "^5.3.0"
 	},
@@ -43,5 +44,5 @@
 		"version": "git add -A",
 		"postversion": "git remote | xargs -L1 git push --all && git push --tags && npm publish"
 	},
-	"version": "0.1.7"
+	"version": "0.1.8"
 }

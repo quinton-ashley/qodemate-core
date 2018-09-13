@@ -1,5 +1,5 @@
 /*
- * qodemate-core contains the file parser, the core algorithm of Qodemate
+ * qodemate-core contains the file parser and the core algorithm of Qodemate
  * the methods of this file use bot.js to present the user's project
  * authors: quinton-ashley
  * copyright 2018
@@ -17,7 +17,7 @@ module.exports = function(opt) {
 	const parseIgnore = require('gitignore-globs');
 	const gitigTemplates = require('gitignore-templates');
 	const ignore = require('ignore');
-	const klawSync = require('klaw-sync');
+	const klawSync = require('klaw');
 	const path = require('path');
 
 	let check = false;
@@ -49,7 +49,7 @@ module.exports = function(opt) {
 		log(project);
 		let files = [];
 		let projDir;
-		if (fs.lstatSync(project[0]).isDirectory()) {
+		if ((await fs.lstat(project[0])).isDirectory()) {
 			projDir = project[0];
 			// implement custom file search from .qodeignore project file
 			// let topFiles = fs.readdirSync(projDir);
@@ -57,7 +57,7 @@ module.exports = function(opt) {
 			//   topFiles[i] = topFiles[i].path;
 			// }
 			//				const filterFn = item => ig.ignores(item);
-			files = klawSync(projDir, {
+			files = await klaw(projDir, {
 				nodir: true
 			});
 			for (let i = 0; i < files.length; i++) {
@@ -72,7 +72,7 @@ module.exports = function(opt) {
 
 			proj = __usrDir + '/' + path.parse(projDir).name;
 			log(proj);
-			fs.copySync(projDir, proj);
+			await fs.copy(projDir, proj);
 
 			// this is a preliminary, rudimentary way of finding
 			// out which app to use for what language
@@ -101,11 +101,13 @@ module.exports = function(opt) {
 		let staticFiles = 0;
 
 		for (let i = 0; i < files.length; i++) {
-			let data = fs.readFileSync(projDir + '/' + files[i], 'utf8');
-			let retVal = await parseFile(projDir + '/' + files[i], data, i - staticFiles);
+			let file = projDir + '/' + files[i];
+			let ext = path.parse(file).ext.toLowerCase();
+			let data = await fs.readFile(file, 'utf8');
+			let retVal = await parseFile(file, ext, data, i - staticFiles);
 			if (!retVal) {
 				usrFiles.push(proj + '/' + files[i]);
-				fs.outputFile(usrFiles[i - staticFiles], '');
+				await fs.outputFile(usrFiles[i - staticFiles], '');
 				setIdxs.push(-1);
 			} else {
 				staticFiles++;
@@ -123,14 +125,14 @@ module.exports = function(opt) {
 		}
 	}
 
-	async function parseFile(file, data, index) {
+	async function parseFile(file, ext, data, index) {
 		let lines, match, mod, prevMatch, tag, tags;
 		let text, primarySeqIdx, isLesson, regex, splitStr;
 		let loop = true;
 		// parse files of different languages
 		// splitStr is the comment syntax for that language
-		file = path.parse(file);
-		switch (file.ext.toLowerCase()) {
+
+		switch (ext) {
 			// case '.css':
 			//   splitStr = '/*';
 			//   regex = /(\n|^)^.*\/\*\d[^\n]*/gm;
